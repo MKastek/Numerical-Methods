@@ -1,4 +1,6 @@
 import numpy as np
+from scipy.linalg import lu
+
 #System of linear equations
 
 #Upper triangular matrix
@@ -36,7 +38,6 @@ def solve_lower_traingular_matrix(A,b):
 #Dolitlle'a - method
 
 
-
 A = np.array([[1,1,-1,4],[0,-2,-3,1],[0,0,2,-3],[0,0,0,2]])
 B = A.transpose()
 
@@ -67,10 +68,57 @@ def doolitle_method(A):
 
     return U,L
 
-M=[[4,-2,-3],[-6,7,6.5],[1,7.5,6.25]]
+M=[[1,2,4],[3,8,14],[2,6,13]]
 b=[12,-6,16]
 U,L=doolitle_method(M)
+
 y=solve_lower_traingular_matrix(L,b)
 x=solve_upper_traingular_matrix(U,y)
 print("Solution from LU decomposition")
 print(x)
+
+def MPD(n):
+    M = np.random.rand(n,n)
+    np.fill_diagonal(M, (np.random.rand(n)+1)*n)
+    return M
+
+def jacobi_method_vectoraized(a,x,b,N,debug=False):
+    alpha = -np.array(a)
+    np.fill_diagonal(alpha,0)
+    alpha = (alpha.T/np.diag(a)).T
+    beta = b/np.diag(a)
+    for krok in range(N):
+        x = beta + np.dot(alpha,x)
+        if debug:
+            print("{:4}".format(krok),end='')
+            for i in x:
+                print("{:14.8f}".format(i),end='')
+            print()
+    return x
+
+
+def seidel_method_vectoraized(a,x,b,N,debug=False):
+    alpha = -np.array(a)
+    np.fill_diagonal(alpha,0)
+    alpha = (alpha.T/np.diag(a)).T
+    beta = b/np.diag(a)
+    f = lambda x: beta + np.dot(alpha, x)
+    for krok in range(N):
+        for i in range(len(x)):
+            x[i] = f(x)[i]
+        if debug:
+            print("{:4}".format(krok),end='')
+            for i in x:
+                print("{:14.8f}".format(i),end='')
+            print()
+    return x
+
+A = MPD(3)
+b = [1,2,3]
+x = [0,0,0]
+
+
+
+print(jacobi_method_vectoraized(A,x,b,10,True))
+print(seidel_method_vectoraized(A,x,b,10,True))
+print(np.linalg.solve(A,b))
